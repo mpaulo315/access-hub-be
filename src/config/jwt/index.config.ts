@@ -1,6 +1,6 @@
-import dotenv from "dotenv"
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
 export const jwtKey = process.env.JWT_KEY;
-export const jwtExpire = process.env.JWT_EXPIRE;
+export const jwtExpire = process.env.JWT_EXPIRES_IN;
