@@ -1,43 +1,66 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { BodyParamUserZod } from "../../typings/User";
+import "express-async-errors";
+
 import bcrypt from "bcrypt";
-import User from "../../models/User";
 import jwt from "jsonwebtoken";
+import * as jwtConfig from "../../config/jwt/index.config";
+import { AuthControllerError } from "./errors";
+import { createUser, readUser } from "../../repositories/user";
+// import { logger } from "../../middlewares/logger";
 
-import { jwtExpire, jwtKey } from "../../config/jwt/index.config";
+export const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { username, password } = req.body;
+  const { error } = BodyParamUserZod.safeParse({ username, password });
 
-export const registerUser = async (req: Request, res: Response) => {
-  const { username, password, nickname } = req.body;
+  if (error) {
+    throw AuthControllerError.InvalidCredentials(error!.message);
+  }
+  
+  const rawUser = await readUser({ username, password });
+
+  if (rawUser) {
+    throw AuthControllerError.InvalidCredentials("Username already exists");
+  }
+
   const hashedPwd = await bcrypt.hash(password, 10);
-  const user = new User({ username, password: hashedPwd, nickname });
-  await user.save();
-  return res.status(201).json({ message: "User created successfully" });
+  const user = await createUser({ username, password: hashedPwd });
+
+  res.status(201).json({ message: "User created successfully", user });
+  return;
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;
 
-  const user = await User.findOne({ username });
+  const user = await readUser({ username, password });
+
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    throw AuthControllerError.UserNotFound("User not found");
   }
 
   const pwdMatch = await bcrypt.compare(password, user.password);
   if (!pwdMatch) {
-    return res.status(401).json({ message: "Invalid credentials" });
+    throw AuthControllerError.InvalidCredentials("Invalid credentials");
   }
 
-  const token = jwt.sign(
-    {
-      userId: user._id,
-    },
-    jwtKey!,
-    {
-      expiresIn: jwtExpire!,
-      algorithm: "HS256",
-    } as jwt.SignOptions
-  );
+  const token = jwt.sign({ userId: user.id }, jwtConfig.jwtKey!, {
+    expiresIn: jwtConfig.jwtExpire,
+    algorithm: "HS256",
+  } as jwt.SignOptions);
 
-  return res.status(200).json({ message: "Login successful", token });
+  res.status(200).json({ message: "Login successful", token });
+  return;
 };
 
-
+export const profile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  throw AuthControllerError.InvalidCredentials("Not implemented");
+};
