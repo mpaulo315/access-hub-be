@@ -54,13 +54,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   } as jwt.SignOptions);
 
   res.status(200).json({ message: "Login successful", token });
+  
   return;
-};
-
-export const profile = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  throw AuthControllerError.InvalidCredentials("Not implemented");
 };
