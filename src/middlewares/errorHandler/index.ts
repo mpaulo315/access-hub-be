@@ -9,7 +9,6 @@ import {
   Router,
 } from "express";
 
-
 const ErrorHandler: ErrorRequestHandler = (
   err: Error,
   req: Request,
@@ -20,7 +19,7 @@ const ErrorHandler: ErrorRequestHandler = (
   const message = err.message || "Internal Server Error";
   const className = err.name;
 
-  res.json({
+  res.status(status).json({
     status,
     message,
     className,
