@@ -4,8 +4,7 @@ import { PORT } from "./config/server/index.config";
 import { router as authRouter } from "./routers/authRouter";
 import ErrorHandler from "./middlewares/errorHandler";
 import { router as loggerRouter } from "./middlewares/logger";
-import "express-async-errors"
-import { AuthControllerError } from "./controllers/authController/errors";
+import TokenVerifier from "./middlewares/authenticator";
 
 const app = Express();
 
@@ -15,9 +14,8 @@ app.use(Express.json());
 
 app.use(authRouter);
 
-app.get("/", async (req: Request, res: Response) => {
-  // res.json({ body: req.body });
-  throw AuthControllerError.InvalidCredentials("Teste");
+app.get("/", TokenVerifier, async (req: Request, res: Response) => {
+  res.status(200).json({message: `Hello, user ID ${req.body.userId}`});
 });
 
 app.use(ErrorHandler);

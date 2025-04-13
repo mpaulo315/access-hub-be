@@ -19,7 +19,7 @@
   },
   "scripts": {
     "migrate": "node-pg-migrate",
-    "dev": "nodemon --watch 'src/' --exec 'ts-node src/index.ts' -e ts"
+    "dev": "nodemon --watch 'src/' --exec 'ts-node src/server.ts' -e ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
