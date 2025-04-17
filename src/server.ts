@@ -3,15 +3,22 @@ import { Request, Response } from "express";
 import { PORT } from "./config/server/index.config";
 import { router as authRouter } from "./routers/authRouter";
 import ErrorHandler from "./middlewares/errorHandler";
-import { router as loggerRouter } from "./middlewares/logger";
+// import { router as loggerRouter } from "./middlewares/logger";
 import TokenVerifier from "./middlewares/authenticator";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = Express();
 
 app.use(Express.json());
 
-app.use(cors())
+app.use(cookieParser())
+
+app.use(cors({
+  origin: "*",
+  credentials: true,
+  methods: ["GET", "POST"],
+}))
 
 app.use(authRouter);
 

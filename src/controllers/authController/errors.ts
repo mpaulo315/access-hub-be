@@ -17,4 +17,12 @@ export class AuthControllerError extends HTTPException {
   static InvalidCredentials(message: string) {
     throw new AuthControllerError(message, 401);
   }
+
+  static UnauthorizedError(message: string) {
+    throw new AuthControllerError(message, 401);
+  }
+
+  static InvalidTokenError(message: string) {
+    throw new AuthControllerError(message, 401);
+  }
 }

@@ -7,7 +7,6 @@ import jwt from "jsonwebtoken";
 import * as jwtConfig from "../../config/jwt/index.config";
 import { AuthControllerError } from "./errors";
 import { createUser, readUser } from "../../repositories/user";
-// import { logger } from "../../middlewares/logger";
 
 export const registerUser = async (
   req: Request,
@@ -20,7 +19,7 @@ export const registerUser = async (
   if (error) {
     throw AuthControllerError.InvalidCredentials(error!.message);
   }
-  
+
   const rawUser = await readUser({ username, password });
 
   if (rawUser) {
@@ -53,7 +52,40 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     algorithm: "HS256",
   } as jwt.SignOptions);
 
-  res.status(200).json({ message: "Login successful", token });
-  
+  res.cookie(jwtConfig.cookieName!, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: jwtConfig.jwtMaxAge,
+  });
+
+  res.status(200).json({ message: "Login successful" });
+
+  return;
+};
+
+export const logoutUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  if (!req.cookies[jwtConfig.cookieName!]) {
+    throw AuthControllerError.UnauthorizedError("Token not found");
+  }
+  res.clearCookie(jwtConfig.cookieName!);
+  res.status(200).json({ message: "Logout successful" });
+  return;
+};
+
+export const checkAuth = async (req: Request, res: Response) => {
+  const token = req.cookies[jwtConfig.cookieName!];
+  if (!token) {
+    throw AuthControllerError.UnauthorizedError("No token provided");
+  }
+  const decoded = jwt.verify(token, jwtConfig.jwtKey!);
+  if (!decoded) {
+    throw AuthControllerError.InvalidTokenError("Invalid token");
+  }
+
+  res.status(200).json({ message: "Token is valid" });
   return;
 };
