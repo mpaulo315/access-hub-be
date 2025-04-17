@@ -5,12 +5,13 @@ import { router as authRouter } from "./routers/authRouter";
 import ErrorHandler from "./middlewares/errorHandler";
 import { router as loggerRouter } from "./middlewares/logger";
 import TokenVerifier from "./middlewares/authenticator";
+import cors from "cors";
 
 const app = Express();
 
 app.use(Express.json());
 
-// app.use(loggerRouter);
+app.use(cors())
 
 app.use(authRouter);
 
