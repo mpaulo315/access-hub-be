@@ -53,6 +53,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   } as jwt.SignOptions);
 
   res.cookie(jwtConfig.cookieName!, token, {
+    signed:true,
     httpOnly: true,
     secure: true,
     sameSite: "none",
@@ -77,7 +78,8 @@ export const logoutUser = async (
 };
 
 export const checkAuth = async (req: Request, res: Response) => {
-  const token = req.cookies[jwtConfig.cookieName!];
+  const token = req.signedCookies[jwtConfig.cookieName!];
+  
   if (!token) {
     throw AuthControllerError.UnauthorizedError("No token provided");
   }
