@@ -6,6 +6,9 @@ import ErrorHandler from "./middlewares/errorHandler";
 import TokenVerifier from "./middlewares/authenticator";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import https from "https";
+
+import fs from "fs";
 
 const app = Express();
 
@@ -28,6 +31,18 @@ app.get("/", TokenVerifier, async (req: Request, res: Response) => {
 
 app.use(ErrorHandler);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}: http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== "development") {
+  const options = {
+    key: fs.readFileSync("key.pem"),
+    cert: fs.readFileSync("cert.pem"),
+  };
+
+  https.createServer(options, app).listen(port, () => {
+    console.log(`Server is running on port ${port}: https://localhost:${port} (HTTPS Localhost)`);
+  });
+} else {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}: https://localhost:${port}`);
+  });
+}
+
