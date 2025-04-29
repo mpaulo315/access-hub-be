@@ -69,7 +69,7 @@ export const logoutUser = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  if (!req.cookies[jwtConfig.cookieName!]) {
+  if (!req.signedCookies[jwtConfig.cookieName!]) {
     throw AuthControllerError.UnauthorizedError("Token not found");
   }
   res.clearCookie(jwtConfig.cookieName!);

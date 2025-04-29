@@ -5,7 +5,7 @@ import { AuthError } from "./errors";
 import { cookieName } from "../../config/jwt/index.config";
 
 const TokenVerifier = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies[cookieName!];
+  const token = req.signedCookies[cookieName!];
   if (!token) {
     throw AuthError.UnauthorizedError("No token provided");
   }
